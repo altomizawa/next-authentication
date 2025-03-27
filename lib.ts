@@ -14,7 +14,7 @@ export async function encrypt(payload: any) {
   .sign(key);
 }
 
-export async function decrypt(input: string) {
+export async function decrypt(input: string): Promise<any> {  
   const { payload } = await jwtVerify(input, key, {
     algorithms: ['HS256'],
   });
@@ -47,15 +47,16 @@ export async function updateSession(request: NextRequest) {
   const parsed = await decrypt(session);
   parsed.expires = new Date(Date.now() + 10 * 1000);
   const res = NextResponse.next();
-  res.cookies.set({
-    name: 'session',
-    value: await encrypt(parsed),
+  res.cookies.set('session', await encrypt(parsed), {
     httpOnly: true,
-    expires: parsed.expires,
+    expires: parsed.expires as Date,
   });
   return res;
 }
 
+
+
 export async function logout() {
-  cookies().delete('session');
-}
+  cookies().delete('session')
+} 
+
